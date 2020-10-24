@@ -108,6 +108,7 @@ proc make_de1_dir {srcdir destdirs} {
         de1.tcl *
         de1app.tcl *
         de1_comms.tcl *
+        usb.tcl *
         gui.tcl *
         machine.tcl *
         utils.tcl *

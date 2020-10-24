@@ -1774,7 +1774,7 @@ proc wifi_character {} {
 }
 
 #set de1_device_list {}
-proc fill_ble_listbox {} {
+proc fill_de1_listbox {} {
 
 	set widget $::ble_listbox_widget
 	$widget delete 0 99999
@@ -1793,6 +1793,7 @@ proc fill_ble_listbox {} {
 			set display_addr [string range $addr_raw 9 13]
 		} elseif { $type == "usb" } {
 			set icon [usb_character]
+			set display_addr [string range $addr_raw 13 20]
 		} elseif { $type == "wifi" } {
 			set icon [wifi_character]
 		} else {
@@ -2588,20 +2589,19 @@ proc change_bluetooth_device {} {
 	################################################################################################################
 
 	set w $::ble_listbox_widget
-	#set ::settings(profile) [$::globals(profiles_listbox) get [$::globals(profiles_listbox) curselection]]
 	if {[$w curselection] == ""} {
 		# no current selection
-		puts "no BLE selection"
+		puts "no DE1 selection"
 		return ""
 	}
 
 	set selection_index [$w curselection]
 	set dic [lindex $::de1_device_list $selection_index]
 	set addr [dict get $dic address]
+	set type [dict get $dic type]
+
 
 	if {$addr == $::settings(bluetooth_address)} {
-		# if no change in setting, then disconnect/reconnect.
-		#return
 
 		################################################################################################################
 		# prevent rapid changing of DE1 bluetooth setting, because that can cause multiple connections to be made to the same DE1
@@ -2617,16 +2617,15 @@ proc change_bluetooth_device {} {
 	set ::globals(changing_bluetooth_device) 1
 	after 5000 {set ::globals(changing_bluetooth_device) 0}
 
-	if {$addr != $::settings(bluetooth_address)} {
-		# if no change in setting, then disconnect/reconnect.
-		set ::settings(bluetooth_address) $addr
-		save_settings
-	}
+	#always save the settings in case the disconnected device is no longer findable on that connectivity
+	set ::settings(bluetooth_address) $addr
+	set ::settings(connectivity) $type
+	save_settings
 
 	# disconnect (if necessary) and reconnect to the DE1 now
-	ble_connect_to_de1
+	comms_connect_to_de1
 
-	fill_ble_listbox
+	fill_de1_listbox
 }
 
 
