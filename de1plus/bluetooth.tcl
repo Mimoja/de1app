@@ -1183,35 +1183,15 @@ proc ble_connect_to_scale {} {
 		return
 	}
 
-	set do_this 0
-	if {$do_this == 1} {
-		if {$::de1(scale_device_handle) != "0"} {
-			msg "Scale already connected, so disconnecting before reconnecting to it"
-			#return
-			catch {
-				#ble close $::de1(scale_device_handle)
-			}
-
-			catch {
-				set ::de1(scale_device_handle) 0
-				set ::de1(cmdstack) {};
-				set ::currently_connecting_scale_handle 0
-				after 1000 ble_connect_to_scale
-				# when the scale disconnect message occurs, this proc will get re-run and a connection attempt will be made
-				return
-			}
-
-		}
-	}
-
 	if {[catch {
-		set ::currently_connecting_scale_handle [ble connect [string toupper $::settings(scale_bluetooth_address)] de1_ble_handler false]
+		set ::currently_connecting_scale_handle [ble connect $::settings(scale_bluetooth_address) de1_ble_handler false]
 		msg "Connecting to scale on $::settings(scale_bluetooth_address)"
 		set retcode 0
 	} err] != 0} {
 		set ::currently_connecting_scale_handle 0
 		set retcode 1
 		msg "Failed to start to BLE connect to scale because: '$err'"
+		error "conect failed to scale on $::settings(scale_bluetooth_address)"
 	}
 	return $retcode
 
