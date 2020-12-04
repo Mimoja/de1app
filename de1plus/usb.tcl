@@ -8,8 +8,6 @@ proc usb_scan_devices {} {
 	if {$::scanning == 1} {
 		after 200 usb_scan_devices
 	}
-
-	error "scanning called"
 }
 
 
