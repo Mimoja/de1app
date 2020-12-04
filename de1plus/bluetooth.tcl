@@ -1828,32 +1828,3 @@ proc scanning_state_text {} {
 
 	return [translate "Search"]
 }
-
-proc scanning_restart {} {
-	if {$::scanning == 1} {
-		return
-	}
-	if {$::android != 1} {
-
-		# insert enough dummy devices to overfill the list, to test whether scroll bars are working
-		set ::de1_device_list [list [dict create address "12:32:16:18:90" name "ble3" type "ble"] [dict create address "10.1.1.20" name "wifi1" type "wifi"] [dict create address "12:32:56:78:91" name "dummy_ble2" type "ble"] [dict create address "12:32:56:78:92" name "dummy_ble3" type "ble"] [dict create address "ttyS0" name "dummy_usb" type "usb"] [dict create address "192.168.0.1" name "dummy_wifi2" type "wifi"]]
-		set ::scale_bluetooth_list [list [dict create address "51:32:56:78:90" name "ACAIAxxx" type "ble"] [dict create address "92:32:56:78:90" name "Skale2" type "ble"] [dict create address "12:32:56:78:92" name "ACAIA2xxx" type "ble"] [dict create address "12:32:56:78:93" name "Skale2b" type "ble"] ]
-
-		set ::scale_types(12:32:56:78:90) "decentscale"
-		set ::scale_types(32:56:78:90:12) "decentscale"
-		set ::scale_types(56:78:90:12:32) "atomaxskale"
-
-		after 200 fill_ble_scale_listbox
-		after 400 fill_ble_listbox
-
-		set ::scanning 1
-		after 3000 { set scanning 0 }
-		return
-	} else {
-		# only scan for a few seconds
-		after 10000 { stop_scanner }
-	}
-
-	set ::scanning 1
-	ble start $::ble_scanner
-}
