@@ -46,7 +46,7 @@ proc usb_connect_handler {usb_path} {
 	set ::currently_connecting_de1_handle 0
 
 	# install readable event handler
-	fileevent $::de1(device_handle) readable [list channel_read_handler $::de1(device_handle)]
+	fileevent $::de1(device_handle) readable [list usb_channel_read_handler $::de1(device_handle)]
 	fconfigure $::de1(device_handle) -mode 115200,n,8,1
 	chan configure $::de1(device_handle) -translation {auto lf}
 	chan configure $::de1(device_handle) -buffering line
@@ -54,6 +54,31 @@ proc usb_connect_handler {usb_path} {
 
 	de1_connect_handler $::de1(device_handle) "$usb_path" "DE1" "usb"
 }
+
+proc usb_channel_read_handler {channel} {
+	if { [catch {set inString [gets $channel]} ] || ![de1_is_connected]} {
+		msg "failure during channel read - handling disconnect"
+		de1_disconnect_handler
+		return
+	}
+
+	# TODO(REED) maybe check for chan blocking
+
+	if {![regexp -nocase {^\[[A-R]\]([0-9A-F][0-9A-F])+$} $inString]} {
+		msg "Dropping invalid message: $inString"
+		return
+	}
+
+    set serial_handle [string index $inString 1]
+    set inHexStr [string range $inString 3 end]
+    set inHex [binary format H* $inHexStr]
+
+    msg [format "DE1 sent: %s %s" $serial_handle $inHexStr]
+
+	set command_name $::de1_serial_handles_to_command_names($serial_handle)
+    de1_event_handler $command_name $inHex
+}
+
 
 proc usb_close_de1 {} {
     catch {
