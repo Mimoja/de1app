@@ -61,3 +61,28 @@ proc usb_close_de1 {} {
 	}
 	set ::de1(device_handle) 0
 }
+
+proc de1_usb {action command_name {data ""}} {
+
+	set command_handle $::de1_command_names_to_serial_handles($command_name)
+	if {$action == "read" || $action == "enable"} {
+		set serial_str "<+$command_handle>\n"
+		puts -nonewline $::de1(device_handle) $serial_str
+	} elseif {$action == "disable"} {
+		set serial_str "<-$command_handle>\n"
+		puts -nonewline $::de1(device_handle) $serial_str
+	} elseif {$action == "write"} {
+		set data_str [binary encode hex $data]
+		set serial_str "<$command_handle>$data_str\n"
+		puts -nonewline $::de1(device_handle) $serial_str
+	} else {
+		msg "Unknown communication action: $action $command_name"
+	}
+	# we don't want buffering to delay sending our messages, so force flush 
+	flush $::de1(device_handle)
+
+	# we don't get an explicit ack, but we're done now
+	msg "de1_comm sent: $serial_str"
+	set ::de1(wrote) 0		
+	return 1
+}

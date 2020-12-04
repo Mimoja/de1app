@@ -122,6 +122,8 @@ proc de1_comm {action command_name {data 0}} {
 	comms_msg "de1_comm sending action $action command $command_name data \"$data\""
 	if {$::settings(connectivity) == "ble"} {
 		return [de1_ble $action $command_name $data]
+	} elseif { $::de1(connectivity) == "usb"} {
+		return [de1_usb $action $command_name $data]
 	} else {
 		error "Unknown connectivity: $::settings(connectivity)"
 	}
