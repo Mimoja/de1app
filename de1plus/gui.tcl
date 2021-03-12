@@ -2,6 +2,7 @@ package provide de1_gui 1.0
 
 package require de1_logging 1.0
 package require de1_plugins 1.0
+package require de1_shotfile 1.0
 
 proc load_skin {} {
 
@@ -1995,6 +1996,9 @@ proc ui_startup {} {
 	if {[ifexists ::settings(mark_most_popular_profiles_used)] == "1"} {
 		shot_history_count_profile_use
 	}
+
+	::shot::init
+
 	#ble_find_de1s
 	
 	setup_images_for_first_page

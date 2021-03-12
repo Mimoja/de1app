@@ -1,6 +1,8 @@
 package require http
 package require tls
 package require json
+package require de1_shotfile 1.0
+package require de1_profile 2.0
 
 set plugin_name "visualizer_upload"
 
@@ -196,11 +198,6 @@ namespace eval ::plugins::${plugin_name} {
             set settings(last_upload_result) [translate "Not uploaded: auto-upload is not enabled"]
             save_plugin_settings visualizer_upload
             return
-        }	
-        if { $::settings(history_saved) != 1 } {
-            set settings(last_upload_result) [translate "Not uploaded: shot was not saved to history"]
-            save_plugin_settings visualizer_upload
-            return
         }
         if {[espresso_elapsed length] < 6 && [espresso_pressure length] < 6 } {
             set settings(last_upload_result) [translate "Not uploaded: shot was too short"]
@@ -214,18 +211,18 @@ namespace eval ::plugins::${plugin_name} {
             save_plugin_settings visualizer_upload
             return
         }
-        set bev_type [ifexists ::settings(beverage_type) "espresso"]
+        set bev_type [huddle get_stripped $::shot::last profile beverage_type]
         if {$bev_type eq "cleaning" || $bev_type eq "calibrate"} {
             set settings(last_upload_result) [translate "Not uploaded: Profile was 'cleaning' or 'calibrate'"]
             save_plugin_settings visualizer_upload
             return
         }
         
-        set espresso_data [format_espresso_for_history]
+        set espresso_data [huddle jsondump $::shot::last]
         ::plugins::visualizer_upload::upload $espresso_data
     }
 
-    proc async_dispatch {old new} {
+    proc async_dispatch {} {
         after 100 ::plugins::visualizer_upload::uploadShotData
     }
 
@@ -240,7 +237,7 @@ namespace eval ::plugins::${plugin_name} {
     }
     
     proc main {} {
-        register_state_change_handler Espresso Idle ::plugins::visualizer_upload::async_dispatch
+        ::shot::register_new_shot_handler ::plugins::visualizer_upload::async_dispatch
     }
 
 }
