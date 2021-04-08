@@ -2090,17 +2090,18 @@ proc highlight_extension {} {
 
 	if {[info proc ::plugins::${plugin}::preload] != "" && [info exists ::plugins::${plugin}::ui_entry] && [set ::plugins::${plugin}::ui_entry] != ""} {
 		canvas_show "$::extensions_settings $::extensions_settings_button"
+			
+		foreach {name value} { "Version: " version "Author: " author "Contact: " contact "\n" description} {
+			set conf [set ::plugins::${plugin}::${value}]
+			if { $conf != {} } {
+				append description "[translate $name]$conf\n"
+			}
+		}
+		.can itemconfigure $::extensions_metadata -text $description
 	} else {
 		canvas_hide "$::extensions_settings $::extensions_settings_button"
 	}
 
-	foreach {name value} { "Version: " version "Author: " author "Contact: " contact "\n" description} {
-		set conf [set ::plugins::${plugin}::${value}]
-		if { $conf != {} } {
-			append description "[translate $name]$conf\n"
-		}
-	}
-	.can itemconfigure $::extensions_metadata -text $description
 
 	fill_extensions_listbox
 	$::extensions_widget selection set $stepnum;

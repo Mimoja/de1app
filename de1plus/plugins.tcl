@@ -120,6 +120,8 @@ namespace eval ::plugins {
     }
 
     proc load {plugin} {
+        preload $plugin
+
         if { [loaded $plugin] } {
             return
         }
@@ -162,6 +164,7 @@ namespace eval ::plugins {
             disable_plugin $plugin
         } else {
             enable_plugin $plugin
+            plugins load $plugin
         }
         return [plugin_enabled $plugin]
     }
@@ -205,11 +208,6 @@ namespace eval ::plugins {
     }
 
     proc init {} {
-        # Preload all plugins
-        foreach plugin [plugins list] {
-            plugins preload $plugin
-        }
-
         # start enabled plugins
         foreach plugin $::settings(enabled_plugins) {
             plugins load $plugin
