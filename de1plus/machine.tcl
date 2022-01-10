@@ -432,6 +432,12 @@ array set ::settings {
 	create_legacy_shotfiles 0
 
 	show_scale_notifications 1
+
+	# profile warning variables
+	warnings_enabled 0
+	warnings_time_seconds_upper 30
+	warnings_time_lower 20
+
 }
 
 # default de1plus skin
